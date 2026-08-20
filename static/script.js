@@ -3,6 +3,7 @@
     const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
     const BOMB_COUNT = 4; // 4 bombs + 12 coins = 16 tiles
     const SURPRISE_ON_BOMB_NUMBER = 2; // which bomb tap (1st, 2nd, 3rd...) triggers the overlay
+    const LIVES_TOTAL = 2; // "2 Lives Only" — tapping this many bombs ends the round
 
     const SLIDE_INTERVAL_MS = 2600;
     const SLIDE_MAX_LOOPS = 2; // full passes through the photos before auto-closing
@@ -12,6 +13,7 @@
     let gridData = [];
     let coinCount = 0;
     let bombCount = 0;
+    let livesLeft = LIVES_TOTAL;
     let gameActive = true;
     let messageTimeout = null;
 
@@ -24,6 +26,7 @@
     const coinCounterEl = document.getElementById('coinCounter');
     const bombCounterEl = document.getElementById('bombCounter');
     const messageEl = document.getElementById('messageDisplay');
+    const resetGameBtn = document.getElementById('resetGameBtn');
 
     const surpriseOverlay = document.getElementById('surpriseOverlay');
     const surpriseImg = document.getElementById('surpriseImg');
@@ -158,13 +161,24 @@
         return String(n).padStart(2, '0');
     }
 
+    function updateResetButtonToPlayAgain() {
+        resetGameBtn.textContent = 'Play again';
+    }
+
+    function updateResetButtonWithLives() {
+        const label = livesLeft === 1 ? '1 Life Left' : `${livesLeft} Lives Left`;
+        resetGameBtn.textContent = label;
+    }
+
     function resetGame() {
         gridData = generateBoard();
         coinCount = 0;
         bombCount = 0;
+        livesLeft = LIVES_TOTAL;
         gameActive = true;
         coinCounterEl.textContent = pad2(0);
         bombCounterEl.textContent = pad2(0);
+        updateResetButtonToPlayAgain();
         renderGrid();
         setMessage('Fresh board! Tap a tile.');
     }
@@ -231,11 +245,23 @@
             gridData[index] = 'tapped_bomb';
             playBombSound();
 
-            if (bombCount === SURPRISE_ON_BOMB_NUMBER) {
-                setMessage('💥 Boom... wait, what\'s this?');
-                openSurprise();
+            livesLeft = Math.max(LIVES_TOTAL - bombCount, 0);
+
+            if (livesLeft <= 0) {
+                gameActive = false;
+                setMessage('💥 Out of lives! Round over.');
+                updateResetButtonToPlayAgain();
             } else {
-                setMessage('💥 Boom! Careful, one more thing might happen soon...');
+                updateResetButtonWithLives();
+                if (bombCount === SURPRISE_ON_BOMB_NUMBER) {
+                    setMessage('💥 Boom... wait, what\'s this?');
+                } else {
+                    setMessage('💥 Boom! Careful, one more thing might happen soon...');
+                }
+            }
+
+            if (bombCount === SURPRISE_ON_BOMB_NUMBER) {
+                openSurprise();
             }
         } else if (type === 'coin') {
             coinCount++;
@@ -248,6 +274,10 @@
             return;
         }
 
+        if (!gameActive) {
+            return;
+        }
+
         const totalCoins = gridData.filter((v) => v === 'coin' || v === 'tapped_coin').length;
         const tappedCoins = gridData.filter((v) => v === 'tapped_coin').length;
         const totalBombs = gridData.filter((v) => v === 'bomb' || v === 'tapped_bomb').length;
@@ -256,6 +286,7 @@
         if (tappedCoins === totalCoins && tappedBombs === totalBombs) {
             setMessage('That\'s every tile! Play again?');
             gameActive = false;
+            updateResetButtonToPlayAgain();
         } else if (tappedCoins === totalCoins && totalBombs > 0) {
             setMessage('All coins found! Just bombs left.');
         } else if (tappedBombs === totalBombs && totalCoins > 0) {
@@ -351,7 +382,7 @@
         }, 3500);
     }
 
-    document.getElementById('resetGameBtn').addEventListener('click', resetGame);
+    resetGameBtn.addEventListener('click', resetGame);
 
     loadBombMedia();
     resetGame();
