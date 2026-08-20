@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Coin or Boom!</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="game-wrapper" role="main">
+
+        <header class="marquee">
+            <p class="eyebrow">12 coins · 4 bombs</p>
+            <h1>Coin or Boom!</h1>
+            <p class="tagline">Flip tiles, grab coins, dodge bombs <br>
+            2 Bombs only can be POP!</p>
+        </header>
+
+        <div class="score-panel">
+            <div class="readout">
+                <span class="readout-label">Coins</span>
+                <span class="readout-value" id="coinCounter">00</span>
+            </div>
+            <div class="readout readout--danger">
+                <span class="readout-label">Bombs</span>
+                <span class="readout-value" id="bombCounter">00</span>
+            </div>
+        </div>
+
+        <div class="grid-container" id="gameGrid" aria-label="Game tile grid"></div>
+
+        <div class="control-bar">
+            <button class="btn" id="resetGameBtn">Play again</button>
+            <div class="message-area" id="messageDisplay" role="status">Tap a tile to flip it!</div>
+        </div>
+    </div>
+
+    <!-- Surprise overlay: fires only on the SECOND bomb tap, fills the whole screen -->
+    <div class="surprise-overlay" id="surpriseOverlay" aria-hidden="true">
+        <div class="surprise-stage" id="surpriseStage">
+            <img id="surpriseImg" class="surprise-img" alt="" />
+            <div class="surprise-placeholder" id="surprisePlaceholder">
+                <p>No photos loaded yet.</p>
+                <p>Drop images into <code>static/images/bomb/</code> and refresh.</p>
+            </div>
+        </div>
+        <div class="heart-field" id="heartField"></div>
+        <div class="surprise-scrim"></div>
+        <div class="surprise-content">
+            <button class="surprise-close" id="surpriseClose" aria-label="Close">&times;</button>
+            <p class="surprise-title">Yunnnn OHHHHHHH 💕</p>
+            <p class="surprise-subtitle">Pumutok</p>
+        </div>
+    </div>
+
+    <audio id="surpriseAudio" preload="auto"></audio>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
